@@ -8,28 +8,29 @@ import streamlit as st
 
 @st.cache_resource
 def install_and_get_julia():
-    """Baixa e extrai os binários do Julia 1.8.5 (compatível com os bloqueios de memória do Streamlit Cloud)."""
+    """Baixa o Julia 1.8.5 e instala os pacotes do Julia necessários (JuMP, HiGHS, XLSX)."""
     julia_dir = "/tmp/julia-1.8.5"
     julia_bin = os.path.join(julia_dir, "bin", "julia")
 
     if not os.path.exists(julia_bin):
         with st.spinner(
-            "Configurando o ambiente Julia... (Isso ocorre apenas na primeira execução)"
+            "Configurando ambiente Julia e instalando solvers (isso ocorre apenas na 1ª execução)..."
         ):
-            # Julia 1.8.5 não dispara o erro de executable stack no libopenlibm
+            # Download do Julia 1.8.5 LTS
             url = "https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz"
             tar_path = "/tmp/julia.tar.gz"
 
-            # Download do Julia
             urllib.request.urlretrieve(url, tar_path)
 
-            # Extração dos arquivos para a pasta /tmp
             with tarfile.open(tar_path, "r:gz") as tar:
                 tar.extractall(path="/tmp")
 
-            # Limpeza do arquivo compactado
             if os.path.exists(tar_path):
                 os.remove(tar_path)
+
+            # Instalação dos pacotes open-source do Julia
+            julia_pkgs = 'using Pkg; Pkg.add(["JuMP", "HiGHS", "XLSX"])'
+            subprocess.run([julia_bin, "-e", julia_pkgs], check=True)
 
     return julia_bin
 
