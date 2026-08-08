@@ -8,26 +8,26 @@ import streamlit as st
 
 @st.cache_resource
 def install_and_get_julia():
-    """Baixa e extrai os binários do Julia 1.10.2 sem depender do packages.txt ou apt."""
-    julia_dir = "/tmp/julia-1.10.2"
+    """Baixa e extrai os binários do Julia 1.8.5 (compatível com os bloqueios de memória do Streamlit Cloud)."""
+    julia_dir = "/tmp/julia-1.8.5"
     julia_bin = os.path.join(julia_dir, "bin", "julia")
 
     if not os.path.exists(julia_bin):
         with st.spinner(
             "Configurando o ambiente Julia... (Isso ocorre apenas na primeira execução)"
         ):
-            # Usando a versão 1.10.2 oficial que corrige o bug de compartilhamento de memória no Linux
-            url = "https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.2-linux-x86_64.tar.gz"
+            # Julia 1.8.5 não dispara o erro de executable stack no libopenlibm
+            url = "https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz"
             tar_path = "/tmp/julia.tar.gz"
 
-            # Download do Julia oficial
+            # Download do Julia
             urllib.request.urlretrieve(url, tar_path)
 
             # Extração dos arquivos para a pasta /tmp
             with tarfile.open(tar_path, "r:gz") as tar:
                 tar.extractall(path="/tmp")
 
-            # Remoção do arquivo compactado temporário
+            # Limpeza do arquivo compactado
             if os.path.exists(tar_path):
                 os.remove(tar_path)
 
